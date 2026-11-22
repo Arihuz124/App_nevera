@@ -10,35 +10,14 @@ import {
   query,
   orderBy
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDBDWfaVFUsMzeorQ8M65ZLmQ8g3Io9uyI",
   authDomain: "mi-nevera-app.firebaseapp.com",
   projectId: "mi-nevera-app",
   storageBucket: "mi-nevera-app.firebasestorage.app",
   messagingSenderId: "791110029618",
-  appId: "1:791110029618:web:436a6fbf9ac5733dcbc72b",
-  measurementId: "G-D7MK1MD763"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-// 1. PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
-const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_PROYECTO.firebaseapp.com",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_PROYECTO.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID"
+  appId: "1:791110029618:web:436a6fbf9ac5733dcbc72b"
 };
 
 const app = initializeApp(firebaseConfig);
