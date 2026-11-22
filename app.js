@@ -1,6 +1,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  addDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
@@ -22,7 +31,6 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-
 // 1. PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE
 const firebaseConfig = {
   apiKey: "TU_API_KEY",
@@ -33,7 +41,6 @@ const firebaseConfig = {
   appId: "TU_APP_ID"
 };
 
-// Inicializar Firebase y Firestore
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -42,29 +49,38 @@ const viewSelect = document.getElementById("view-select");
 const viewFridge = document.getElementById("view-fridge");
 const currentFridgeTitle = document.getElementById("current-fridge-title");
 const foodList = document.getElementById("food-list");
-const modalOverlay = document.getElementById("modal-overlay");
+const modalAdd = document.getElementById("modal-add");
+const formAddFood = document.getElementById("form-add-food");
+const inputFoodName = document.getElementById("input-food-name");
+const inputFoodQty = document.getElementById("input-food-qty");
+const btnRemove = document.getElementById("btn-remove");
+const removeBanner = document.getElementById("remove-banner");
 
+let currentFridgeId = null;
 let unsubscribeFridge = null;
+let isRemoveMode = false;
 
-// Diccionario simple de iconos (ampliable a futuro)
+// Diccionario simple de iconos
 function getFoodIcon(name) {
   const text = name.toLowerCase();
-  if (text.includes("carne") || text.includes("res") || text.includes("cerdo")) return "🥩";
-  if (text.includes("pollo") || text.includes("pechuga")) return "🍗";
+  if (text.includes("carne") || text.includes("res") || text.includes("cerdo") || text.includes("chuleta")) return "🥩";
+  if (text.includes("pollo") || text.includes("pechuga") || text.includes("ala")) return "🍗";
   if (text.includes("pescado") || text.includes("atun") || text.includes("camaron")) return "🐟";
+  if (text.includes("salchicha") || text.includes("chorizo") || text.includes("jamon")) return "🌭";
   if (text.includes("huevo")) return "🥚";
   if (text.includes("leche") || text.includes("yogur")) return "🥛";
   if (text.includes("queso")) return "🧀";
   if (text.includes("arroz")) return "🍚";
+  if (text.includes("pasta") || text.includes("fideo")) return "🍝";
   if (text.includes("pan")) return "🍞";
   if (text.includes("manzana") || text.includes("fruta") || text.includes("guineo")) return "🍎";
-  if (text.includes("tomate") || text.includes("lechuga") || text.includes("verdura")) return "🥬";
+  if (text.includes("tomate") || text.includes("lechuga") || text.includes("verdura") || text.includes("cebolla")) return "🥬";
   if (text.includes("agua") || text.includes("jugo") || text.includes("te")) return "🥤";
-  return "🍽️"; // Icono por defecto
+  return "🍽️";
 }
 
 // --- NAVEGACIÓN ENTRE PESTAÑAS ---
-document.querySelectorAll(".fridge-card").forEach(card => {
+document.querySelectorAll(".fridge-card").forEach((card) => {
   card.addEventListener("click", () => {
     const fridgeId = card.dataset.fridgeId;
     const fridgeName = card.dataset.fridgeName;
@@ -73,31 +89,35 @@ document.querySelectorAll(".fridge-card").forEach(card => {
 });
 
 document.getElementById("btn-back").addEventListener("click", () => {
-  if (unsubscribeFridge) unsubscribeFridge(); // Dejar de escuchar cambios al salir
+  if (unsubscribeFridge) unsubscribeFridge();
+  setRemoveMode(false);
+  currentFridgeId = null;
   viewFridge.classList.remove("active");
   viewSelect.classList.add("active");
 });
 
 // --- ESCUCHAR FIREBASE EN TIEMPO REAL ---
 function openFridge(fridgeId, fridgeName) {
+  currentFridgeId = fridgeId;
   currentFridgeTitle.textContent = fridgeName;
   viewSelect.classList.remove("active");
   viewFridge.classList.add("active");
   foodList.innerHTML = `<li class="empty-msg">Cargando alimentos...</li>`;
 
-  // Escucha la subcolección: neveras -> [fridgeId] -> alimentos
   const itemsRef = collection(db, "neveras", fridgeId, "alimentos");
+  const q = query(itemsRef, orderBy("creadoEn", "desc"));
 
-  unsubscribeFridge = onSnapshot(itemsRef, (snapshot) => {
+  unsubscribeFridge = onSnapshot(q, (snapshot) => {
     foodList.innerHTML = "";
 
     if (snapshot.empty) {
+      setRemoveMode(false);
       foodList.innerHTML = `<li class="empty-msg">La nevera está vacía</li>`;
       return;
     }
 
-    snapshot.forEach((doc) => {
-      const data = doc.data();
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
       const nombre = data.nombre || "Sin nombre";
       const cantidad = data.cantidad ? `(${data.cantidad})` : "";
       const icono = getFoodIcon(nombre);
@@ -109,8 +129,16 @@ function openFridge(fridgeId, fridgeName) {
           <span class="food-icon">${icono}</span>
           <span>${nombre}</span>
         </div>
-        <span class="food-qty">${cantidad}</span>
+        <div class="food-right">
+          <span class="food-qty">${cantidad}</span>
+          <button class="btn-delete-item ${isRemoveMode ? "" : "hidden"}" data-id="${docSnap.id}">Quitar</button>
+        </div>
       `;
+
+      li.querySelector(".btn-delete-item").addEventListener("click", async () => {
+        await deleteDoc(doc(db, "neveras", currentFridgeId, "alimentos", docSnap.id));
+      });
+
       foodList.appendChild(li);
     });
   }, (error) => {
@@ -119,13 +147,52 @@ function openFridge(fridgeId, fridgeName) {
   });
 }
 
-// --- BOTONES EMERGENTES (AÚN SIN FUNCIONAR) ---
-function showTempModal() {
-  modalOverlay.classList.remove("hidden");
+// --- MODO AGREGAR ALIMENTO ---
+document.getElementById("btn-add").addEventListener("click", () => {
+  setRemoveMode(false);
+  formAddFood.reset();
+  modalAdd.classList.remove("hidden");
+  inputFoodName.focus();
+});
+
+document.getElementById("btn-cancel-add").addEventListener("click", () => {
+  modalAdd.classList.add("hidden");
+});
+
+formAddFood.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!currentFridgeId) return;
+
+  const nombre = inputFoodName.value.trim();
+  const cantidad = inputFoodQty.value.trim();
+  if (!nombre) return;
+
+  modalAdd.classList.add("hidden");
+
+  try {
+    await addDoc(collection(db, "neveras", currentFridgeId, "alimentos"), {
+      nombre,
+      cantidad,
+      creadoEn: serverTimestamp()
+    });
+  } catch (error) {
+    console.error("Error al guardar:", error);
+    alert("No se pudo guardar el alimento. Revisa la consola.");
+  }
+});
+
+// --- MODO RETIRAR ALIMENTO ---
+function setRemoveMode(active) {
+  isRemoveMode = active;
+  btnRemove.classList.toggle("active-mode", active);
+  btnRemove.textContent = active ? "Listo" : "- Retirar";
+  removeBanner.classList.toggle("hidden", !active);
+
+  document.querySelectorAll(".btn-delete-item").forEach((btn) => {
+    btn.classList.toggle("hidden", !active);
+  });
 }
 
-document.getElementById("btn-add").addEventListener("click", showTempModal);
-document.getElementById("btn-remove").addEventListener("click", showTempModal);
-document.getElementById("btn-close-modal").addEventListener("click", () => {
-  modalOverlay.classList.add("hidden");
+btnRemove.addEventListener("click", () => {
+  setRemoveMode(!isRemoveMode);
 });
