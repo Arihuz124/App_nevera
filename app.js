@@ -61,7 +61,7 @@ function getFoodIcon(name) {
   if (text.includes("pizza")) return "🍕";
   if (text.includes("burrito")) return "🌯"; 
   if (text.includes("tomate") || text.includes("lechuga") || text.includes("verdura") || text.includes("cebolla")) return "🥬";
-  if (text.includes("agua") || text.includes("jugo") || text.includes("te")) return "🥤";
+  if (text.includes("agua") || text.includes("jugo") || /\bt[eé]\b/.test(text)) return "🥤";
   return "🍽️";
 }
 
