@@ -43,16 +43,23 @@ let isRemoveMode = false;
 function getFoodIcon(name) {
   const text = name.toLowerCase();
   if (text.includes("carne") || text.includes("res") || text.includes("cerdo") || text.includes("chuleta")) return "🥩";
-  if (text.includes("pollo") || text.includes("pechuga") || text.includes("ala")) return "🍗";
+  if (text.includes("pollo") || text.includes("pechuga") || text.includes("pierna") || text.includes("ala")) return "🍗";
   if (text.includes("pescado") || text.includes("atun") || text.includes("camaron")) return "🐟";
   if (text.includes("salchicha") || text.includes("chorizo") || text.includes("jamon")) return "🌭";
   if (text.includes("huevo")) return "🥚";
+  if (text.includes("dulces")) return "🍬";
+  if (text.includes("chocolate")) return "🍫";
   if (text.includes("leche") || text.includes("yogur")) return "🥛";
   if (text.includes("queso")) return "🧀";
   if (text.includes("arroz")) return "🍚";
   if (text.includes("pasta") || text.includes("fideo")) return "🍝";
   if (text.includes("pan")) return "🍞";
-  if (text.includes("manzana") || text.includes("fruta") || text.includes("guineo")) return "🍎";
+  if (text.includes("manzana") || text.includes("fruta")) return "🍎";
+  if (text.includes("banana")) return "🍌";
+  if (text.includes("naranja")) return "🍊";
+  if (text.includes("hamburguesa")) return "🍔";
+  if (text.includes("pizza")) return "🍕";
+  if (text.includes("burrito")) return "🌯"; 
   if (text.includes("tomate") || text.includes("lechuga") || text.includes("verdura") || text.includes("cebolla")) return "🥬";
   if (text.includes("agua") || text.includes("jugo") || text.includes("te")) return "🥤";
   return "🍽️";
@@ -159,7 +166,9 @@ formAddFood.addEventListener("submit", async (e) => {
     alert("No se pudo guardar el alimento. Revisa la consola.");
   }
 });
-
+const modalTemp = document.getElementById("modal-temp");
+document.getElementById("btn-add-fridge").addEventListener("click", () => modalTemp.classList.remove("hidden"));
+document.getElementById("btn-close-temp").addEventListener("click", () => modalTemp.classList.add("hidden"));
 // --- MODO RETIRAR ALIMENTO ---
 function setRemoveMode(active) {
   isRemoveMode = active;

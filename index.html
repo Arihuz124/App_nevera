@@ -13,12 +13,13 @@
     <h1 class="main-title">Selecciona una nevera</h1>
     
     <div id="fridges-container" class="fridges-list">
-      <div class="fridge-card" data-fridge-id="nevera-principal" data-fridge-name="Nevera de Casa">
+      <div class="fridge-card" data-fridge-id="nevera-principal" data-fridge-name="Nevera del Depa">
         <div class="fridge-img-placeholder">
           <span>Sin imagen</span>
         </div>
         <h2 class="fridge-name">Nevera de Casa</h2>
       </div>
+      <button id="btn-add-fridge" class="btn-add-fridge">+ Añadir otra nevera</button>
     </div>
   </main>
 
@@ -62,7 +63,12 @@
       </form>
     </div>
   </div>
-
+    <div id="modal-temp" class="modal-overlay hidden">
+    <div class="modal-box">
+        <p class="modal-title">Aún no funciono</p>
+        <button id="btn-close-temp" class="btn-modal-cancel">Entendido</button>
+    </div>
+    </div>
   <script type="module" src="app.js"></script>
 </body>
 </html>
