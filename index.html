@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mi Nevera</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- VISTA 1: Selección de Nevera -->
+  <main id="view-select" class="screen active">
+    <h1 class="main-title">Selecciona una nevera</h1>
+    
+    <div id="fridges-container" class="fridges-list">
+      <!-- Tarjeta de Nevera 1 (agrupada en un cuadro) -->
+      <div class="fridge-card" data-fridge-id="nevera-principal" data-fridge-name="Nevera de Casa">
+        <div class="fridge-img-placeholder">
+          <!-- Cuando tengas tu imagen, reemplaza el span por: <img src="img/nevera1.png" alt="Nevera"> -->
+          <span>Sin imagen</span>
+        </div>
+        <h2 class="fridge-name">Nevera de Casa</h2>
+      </div>
+    </div>
+  </main>
+
+  <!-- VISTA 2: Contenido de la Nevera -->
+  <main id="view-fridge" class="screen">
+    <header class="fridge-header">
+      <button id="btn-back" class="btn-back">← Volver</button>
+      <h1 id="current-fridge-title" class="fridge-title">Nevera</h1>
+    </header>
+
+    <!-- Flexbox de botones pastel -->
+    <div class="actions-row">
+      <button id="btn-add" class="btn-action btn-pastel-green">+ Agregar</button>
+      <button id="btn-remove" class="btn-action btn-pastel-red">- Retirar</button>
+    </div>
+
+    <!-- Lista de alimentos en tiempo real -->
+    <section class="items-section">
+      <ul id="food-list" class="food-list">
+        <li class="empty-msg">Cargando alimentos...</li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- Ventana Emergente (Modal) -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal-box">
+      <p id="modal-text">Aún sin funcionar</p>
+      <button id="btn-close-modal" class="btn-modal-close">Entendido</button>
+    </div>
+  </div>
+
+  <!-- Firebase y lógica de la app -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
